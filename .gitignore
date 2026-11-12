@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+env/
+.env
+
+# PHP
+.env
+
+# JavaScript
+node_modules/
+dist/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
