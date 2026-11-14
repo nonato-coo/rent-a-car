@@ -1,17 +1,17 @@
-# Groyecto Rent a Car
+# Proyecto Rent a Car
 
 ---
 
 ## 1. Reglas
 
-### Git (lo mínimo que necesitan)
+### Git
 
 - `main` solo recibe código que funciona.
 - Flujo: `git pull` → trabajar → `git add .` → `git commit -m "mensaje claro"` → `git push`.
 - Para unir a `main`: Pull Request en GitHub, y otro integrante lo revisa.
 - Cada parte tiene su propia carpeta, así casi no hay conflictos.
 
-### Cómo se ejecuta todo en una computadora
+### Cómo se ejecuta todo
 
 | Módulo     | Comando                                                      | Dirección                               |
 | ---------- | ------------------------------------------------------------ | --------------------------------------- |
