@@ -1,7 +1,5 @@
 # Proyecto Rent a Car
 
----
-
 ## 1. Reglas
 
 ### Git
