@@ -5,13 +5,15 @@ import sqlite3
 DB_NOMBRE = "rentacar.db"
 
 def obtener_conexion():
-    """Retorna una conexión a la base de datos de SQLlite"""
+    """Retorna una conexión a la base de datos de SQLlite."""
+
     conexion = sqlite3.connect(DB_NOMBRE)
     conexion.row_factory = sqlite3.Row
     return conexion
 
 def inicializar_base_de_datos():
-    """Crea todas las tablas de la base de datos si no existen"""
+    """Crea todas las tablas de la base de datos si no existen."""
+
     conexion = obtener_conexion()
     cursor = conexion.cursor()
 
@@ -21,7 +23,7 @@ def inicializar_base_de_datos():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nombre TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
+        password TEXT NOT NULL, 
         rol TEXT NOT NULL -- puede ser 'admin' o 'usuario'
     )
     """)
