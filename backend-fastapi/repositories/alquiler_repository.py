@@ -4,9 +4,7 @@ from database import obtener_conexion
 from domain.alquiler import Alquiler
 
 class AlquilerRepository:
-    """Gestiona las operaciones de
-    acceso a datos de los alquileres.
-    """
+    """Gestiona las operaciones de acceso a datos de los alquileres."""
 
     def crear(self, alquiler: Alquiler) -> int:
         """Registra un nuevo alquiler en la base de datos.

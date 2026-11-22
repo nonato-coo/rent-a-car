@@ -6,9 +6,7 @@ from domain.vehiculo import Vehiculo
 
 
 class VehiculoRepository:
-    """Gestiona las operaciones de
-    acceso a datos de los vehículos.
-    """
+    """Gestiona las operaciones de acceso a datos de los vehículos."""
 
     def _mapear(self, row) -> Vehiculo:
         """Convierte una fila de la base de datos en un objeto Vehiculo.

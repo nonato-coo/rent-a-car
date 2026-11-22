@@ -4,9 +4,7 @@ from database import obtener_conexion
 
 
 class CompraRepository:
-    """Gestiona las operaciones de
-    acceso a datos de las compras.
-    """
+    """Gestiona las operaciones de acceso a datos de las compras."""
 
     def crear(self, vehiculo_id: int, cantidad: int,
         costo_unitario: float, proveedor: str, fecha: str) -> int:
