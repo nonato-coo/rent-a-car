@@ -1,5 +1,4 @@
 """entidad.py"""
-
 class Entidad:
     """Define la estructura base y los comportamientos comunes de las entidades del sistema."""
 

@@ -1,8 +1,7 @@
 """alquiler.py"""
 
 from datetime import datetime
-from entidad import Entidad
-
+from domain.entidad import Entidad
 
 class Alquiler(Entidad):
     """Representa un alquiler de vehículo y administra su información y estado."""

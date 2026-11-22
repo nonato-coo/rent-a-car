@@ -1,6 +1,6 @@
 """factura.py"""
 
-from entidad import Entidad
+from domain.entidad import Entidad
 from functools import reduce
 
 class DetalleFactura(Entidad):

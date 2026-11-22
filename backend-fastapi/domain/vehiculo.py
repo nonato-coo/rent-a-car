@@ -1,8 +1,6 @@
 """vehiculo.py"""
 
-from entidad import Entidad
-
-
+from domain.entidad import Entidad
 class Vehiculo(Entidad):
     """Representa un vehículo y sus características dentro del sistema de alquiler."""
 
