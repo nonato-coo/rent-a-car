@@ -214,3 +214,85 @@ def listar_facturas():
     conexion.close()
     total_facturado = sumar_montos([f["total"] for f in facturas])
     return {"facturas": facturas, "total_facturado": total_facturado}
+
+@router.get("/clientes/{cliente_id}/alquileres")
+def alquileres_por_cliente(cliente_id: int):
+    """Obtiene los alquileres realizados por un cliente específico.
+
+    Args:
+        cliente_id (int): Identificador del cliente cuyos alquileres
+            se desean consultar.
+
+    Returns:
+        list[dict]: Lista de alquileres del cliente, incluyendo información
+            del vehículo asociado, como marca, modelo y año.
+    """
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("""
+        SELECT a.*, v.marca, v.modelo, v.anio
+        FROM alquileres a
+        JOIN vehiculos v ON a.vehiculo_id = v.id
+        WHERE a.cliente_id = ?
+        ORDER BY a.id DESC
+    """, (cliente_id,))
+    filas = [dict(f) for f in cursor.fetchall()]
+    conexion.close()
+    return filas
+
+@router.get("/usuarios")
+def listar_usuarios():
+    """Obtiene la lista de usuarios registrados en el sistema.
+
+    Returns:
+        list[dict]: Lista de usuarios con sus identificadores,
+            nombres, correos electrónicos y roles.
+    """
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT id, nombre, email, rol FROM usuarios")
+    filas = [dict(f) for f in cursor.fetchall()]
+    conexion.close()
+    return filas
+
+@router.get("/clientes")
+def listar_clientes():
+    """Obtiene la lista de clientes registrados en el sistema.
+
+    Returns:
+        list[dict]: Lista de clientes con sus identificadores, datos
+            de usuario, números de teléfono y direcciones.
+    """
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("""
+        SELECT c.id, c.usuario_id, u.nombre, u.email, c.telefono, c.direccion
+        FROM clientes c
+        LEFT JOIN usuarios u ON c.usuario_id = u.id
+    """)
+    filas = [dict(f) for f in cursor.fetchall()]
+    conexion.close()
+    return filas
+
+@router.delete("/vehiculos/{vehiculo_id}")
+def eliminar_vehiculo(vehiculo_id: int):
+    """Elimina un vehículo de la base de datos.
+
+    Args:
+        vehiculo_id (int): Identificador del vehículo que se desea eliminar.
+
+    Returns:
+        dict: Mensaje de confirmación y el identificador del vehículo eliminado.
+
+    Raises:
+        HTTPException: Si el vehículo no existe, devuelve el código HTTP 404.
+    """
+    actual = vehiculo_repo.obtener_por_id(vehiculo_id)
+    if not actual:
+        raise HTTPException(status_code=404, detail="Vehículo no encontrado")
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("DELETE FROM vehiculos WHERE id = ?", (vehiculo_id,))
+    conexion.commit()
+    conexion.close()
+    return {"mensaje": "Vehículo eliminado", "id": vehiculo_id}
