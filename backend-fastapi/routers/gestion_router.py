@@ -14,7 +14,6 @@ vehiculo_repo = VehiculoRepository()
 alquiler_repo = AlquilerRepository()
 inventario_service = ServicioInventario()
 
-
 @router.post("/login")
 def login(req: LoginRequest):
     """Autentica a un usuario mediante sus credenciales de acceso.
@@ -43,7 +42,6 @@ def login(req: LoginRequest):
         "email": usuario["email"],
         "rol": usuario["rol"]
     }
-
 
 @router.post("/registro")
 def registro(req: RegistroRequest):
