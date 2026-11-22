@@ -124,7 +124,7 @@ class VehiculoUpdate(BaseModel):
     categoria: Optional[str] = None
     precio_por_dia: Optional[float] = None
     habilitado: Optional[int] = None
-    
+
 class EstadoAlquilerUpdate(BaseModel):
     """Define el nuevo estado que se asignará a un alquiler.
 

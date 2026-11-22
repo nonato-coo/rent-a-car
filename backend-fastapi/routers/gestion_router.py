@@ -1,0 +1,218 @@
+"""gestion_router.py"""
+
+from fastapi import APIRouter, HTTPException
+from database import obtener_conexion
+from schemas.modelos import LoginRequest, RegistroRequest, VehiculoCreate, VehiculoUpdate, EstadoAlquilerUpdate
+from domain.vehiculo import Vehiculo
+from repositories.vehiculo_repository import VehiculoRepository
+from repositories.alquiler_repository import AlquilerRepository
+from services.servicio_inventario import ServicioInventario
+from utils.funciones import extraer_marcas_unicas, extraer_anios_unicos, sumar_montos
+
+router = APIRouter(tags=["Gestión y Auth"])
+vehiculo_repo = VehiculoRepository()
+alquiler_repo = AlquilerRepository()
+inventario_service = ServicioInventario()
+
+
+@router.post("/login")
+def login(req: LoginRequest):
+    """Autentica a un usuario mediante sus credenciales de acceso.
+
+    Args:
+        req (LoginRequest): Correo electrónico y contraseña del usuario.
+
+    Returns:
+        dict: Datos del usuario autenticado, incluyendo su identificador,
+            nombre, correo electrónico y rol.
+
+    Raises:
+        HTTPException: Si las credenciales son incorrectas, devuelve
+            el código HTTP 401.
+    """
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT id, nombre, email, rol FROM usuarios WHERE email = ? AND password = ?", (req.email, req.password))
+    usuario = cursor.fetchone()
+    conexion.close()
+    if not usuario:
+        raise HTTPException(status_code=401, detail="Credenciales incorrectas")
+    return {
+        "id": usuario["id"],
+        "nombre": usuario["nombre"],
+        "email": usuario["email"],
+        "rol": usuario["rol"]
+    }
+
+
+@router.post("/registro")
+def registro(req: RegistroRequest):
+    """Registra un nuevo usuario y, si corresponde, crea su perfil de cliente.
+
+    Args:
+        req (RegistroRequest): Datos personales, credenciales y rol del
+            usuario que se desea registrar.
+
+    Returns:
+        dict: Identificadores del usuario y del cliente, si corresponde,
+            junto con el nombre y el rol asignados.
+
+    Raises:
+        HTTPException: Si ocurre un error al registrar el usuario o crear
+            su perfil de cliente, devuelve el código HTTP 400.
+    """
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    try:
+        cursor.execute("INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)", (req.nombre, req.email, req.password, req.rol))
+        usuario_id = cursor.lastrowid
+        cliente_id = None
+        if req.rol == "cliente":
+            cursor.execute("INSERT INTO clientes (usuario_id, telefono, direccion) VALUES (?, ?, ?)", (usuario_id, req.telefono, req.direccion))
+            cliente_id = cursor.lastrowid
+        conexion.commit()
+    except Exception as e:
+        conexion.close()
+        raise HTTPException(status_code=400, detail=f"No se pudo registrar el usuario: {str(e)}")
+    conexion.close()
+    return {"usuario_id": usuario_id, "cliente_id": cliente_id, "nombre": req.nombre, "rol": req.rol}
+
+
+@router.get("/marcas")
+def obtener_marcas():
+    """Obtiene las marcas únicas de los vehículos registrados.
+
+    Returns:
+        dict: Diccionario que contiene una lista de marcas únicas
+            ordenadas alfabéticamente.
+    """
+    vehiculos_dict = [v.to_dict() for v in vehiculo_repo.listar_todos()]
+    return {"marcas": extraer_marcas_unicas(vehiculos_dict)}
+
+@router.get("/anios")
+def obtener_anios():
+    """Obtiene los años de fabricación únicos de los vehículos registrados.
+
+    Returns:
+        dict: Diccionario que contiene una lista de años únicos ordenados
+            de forma descendente.
+    """
+    vehiculos_dict = [v.to_dict() for v in vehiculo_repo.listar_todos()]
+    return {"anios": extraer_anios_unicos(vehiculos_dict)}
+
+@router.post("/vehiculos")
+def crear_vehiculo(data: VehiculoCreate):
+    """Registra un nuevo vehículo en el inventario.
+
+    Args:
+        data (VehiculoCreate): Datos del vehículo que se desea registrar,
+            incluyendo marca, modelo, año, categoría, precio y stock inicial.
+
+    Returns:
+        dict: Datos del vehículo creado, incluyendo su identificador
+            asignado por la base de datos.
+    """
+    v = Vehiculo(
+        marca=data.marca,
+        modelo=data.modelo,
+        anio=data.anio,
+        categoria=data.categoria,
+        precio_por_dia=data.precio_por_dia,
+        stock_total=data.stock_total,
+        habilitado=data.habilitado
+    )
+    nuevo_id = vehiculo_repo.crear(v)
+    v.id = nuevo_id
+    return v.to_dict()
+
+@router.put("/vehiculos/{vehiculo_id}")
+def actualizar_vehiculo(vehiculo_id: int, data: VehiculoUpdate):
+    """Actualiza los datos de un vehículo existente.
+
+    Args:
+        vehiculo_id (int): Identificador del vehículo que se desea actualizar.
+        data (VehiculoUpdate): Campos del vehículo que se desean modificar.
+            Los campos no proporcionados conservan sus valores actuales.
+
+    Returns:
+        dict: Datos actualizados del vehículo.
+
+    Raises:
+        HTTPException: Si el vehículo no existe, devuelve el código HTTP 404.
+    """
+    actual = vehiculo_repo.obtener_por_id(vehiculo_id)
+    if not actual:
+        raise HTTPException(status_code=404, detail="Vehículo no encontrado")
+
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    marca = data.marca if data.marca is not None else actual.marca
+    modelo = data.modelo if data.modelo is not None else actual.modelo
+    anio = data.anio if data.anio is not None else actual.anio
+    categoria = data.categoria if data.categoria is not None else actual.categoria
+    precio = data.precio_por_dia if data.precio_por_dia is not None else actual.precio_por_dia
+    habilitado = data.habilitado if data.habilitado is not None else actual.habilitado
+
+    cursor.execute("""
+        UPDATE vehiculos
+        SET marca = ?, modelo = ?, anio = ?, categoria = ?, precio_por_dia = ?, habilitado = ?
+        WHERE id = ?
+    """, (marca, modelo, anio, categoria, precio, habilitado, vehiculo_id))
+    conexion.commit()
+    conexion.close()
+    return vehiculo_repo.obtener_por_id(vehiculo_id).to_dict()
+
+@router.get("/alquileres")
+def listar_alquileres():
+    """Obtiene todos los alquileres registrados en el sistema.
+
+    Returns:
+        list[dict]: Lista de alquileres ordenados por identificador,
+            del más reciente al más antiguo.
+    """
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM alquileres ORDER BY id DESC")
+    filas = [dict(f) for f in cursor.fetchall()]
+    conexion.close()
+    return filas
+
+@router.put("/alquileres/{alquiler_id}/estado")
+def cambiar_estado_alquiler(alquiler_id: int, req: EstadoAlquilerUpdate):
+    """Actualiza el estado de un alquiler existente.
+
+    Args:
+        alquiler_id (int): Identificador del alquiler que se desea modificar.
+        req (EstadoAlquilerUpdate): Nuevo estado que se asignará al alquiler.
+
+    Returns:
+        dict: Identificador del alquiler y nuevo estado asignado.
+
+    Raises:
+        HTTPException: Si el estado proporcionado no pertenece a los estados
+            permitidos, devuelve el código HTTP 400.
+    """
+    estados_validos = ["reservado", "activo", "devuelto", "cancelado"]
+    if req.estado not in estados_validos:
+        raise HTTPException(status_code=400, detail="Estado inválido")
+    alquiler_repo.actualizar_estado(alquiler_id, req.estado)
+    return {"alquiler_id": alquiler_id, "estado": req.estado}
+
+@router.get("/facturas")
+def listar_facturas():
+    """Obtiene las facturas registradas junto con sus detalles y el total facturado.
+
+    Returns:
+        dict: Diccionario que contiene la lista de facturas, cada una con
+            sus respectivos detalles, y la suma total de las facturas.
+    """
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM facturas ORDER BY id DESC")
+    facturas = [dict(f) for f in cursor.fetchall()]
+    for f in facturas:
+        cursor.execute("SELECT * FROM detalle_factura WHERE factura_id = ?", (f["id"],))
+        f["detalles"] = [dict(d) for d in cursor.fetchall()]
+    conexion.close()
+    total_facturado = sumar_montos([f["total"] for f in facturas])
+    return {"facturas": facturas, "total_facturado": total_facturado}
