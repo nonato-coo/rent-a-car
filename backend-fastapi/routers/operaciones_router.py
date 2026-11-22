@@ -1,4 +1,4 @@
-"""opereaciones_router.py"""
+"""operaciones_router.py"""
 
 from datetime import datetime
 
@@ -13,7 +13,6 @@ router = APIRouter(tags=["Operaciones"])
 vehiculo_repo = VehiculoRepository()
 inventario_service = ServicioInventario()
 reservas_service = ServicioReservas()
-
 
 @router.post("/cotizar")
 def cotizar_alquiler(req: CotizacionRequest):
@@ -40,7 +39,8 @@ def cotizar_alquiler(req: CotizacionRequest):
         f1 = datetime.strptime(req.fecha_inicio, "%Y-%m-%d")
         f2 = datetime.strptime(req.fecha_fin, "%Y-%m-%d")
         if f2 < f1:
-            raise HTTPException(status_code=400, detail="La fecha fin no puede ser menor a la fecha inicio")
+            raise HTTPException(status_code=400, 
+                                detail="La fecha fin no puede ser menor a la fecha inicio")
         dias = max((f2 - f1).days, 1)
     except ValueError:
         raise HTTPException(status_code=400, detail="Formato de fecha inválido. Usa YYYY-MM-DD")
@@ -48,7 +48,6 @@ def cotizar_alquiler(req: CotizacionRequest):
     cotizacion = CalculadoraCostos.cotizar(vehiculo.precio_por_dia, dias)
     cotizacion["vehiculo"] = vehiculo.marca + " " + vehiculo.modelo
     return cotizacion
-
 
 @router.post("/compras")
 def registrar_compra(compra: CompraCreate):

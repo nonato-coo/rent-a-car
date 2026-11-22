@@ -10,7 +10,6 @@ router = APIRouter(prefix="/vehiculos", tags=["Vehículos"])
 vehiculo_repo = VehiculoRepository()
 inventario_service = ServicioInventario()
 
-
 @router.get("/")
 def listar_vehiculos(
     marca: Optional[str] = None,

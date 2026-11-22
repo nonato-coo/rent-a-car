@@ -31,7 +31,8 @@ def login(req: LoginRequest):
     """
     conexion = obtener_conexion()
     cursor = conexion.cursor()
-    cursor.execute("SELECT id, nombre, email, rol FROM usuarios WHERE email = ? AND password = ?", (req.email, req.password))
+    cursor.execute("SELECT id, nombre, email, rol FROM usuarios WHERE email = ? AND password = ?",
+                   (req.email, req.password))
     usuario = cursor.fetchone()
     conexion.close()
     if not usuario:
@@ -62,19 +63,21 @@ def registro(req: RegistroRequest):
     conexion = obtener_conexion()
     cursor = conexion.cursor()
     try:
-        cursor.execute("INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)", (req.nombre, req.email, req.password, req.rol))
+        cursor.execute("INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)",
+                       (req.nombre, req.email, req.password, req.rol))
         usuario_id = cursor.lastrowid
         cliente_id = None
         if req.rol == "cliente":
-            cursor.execute("INSERT INTO clientes (usuario_id, telefono, direccion) VALUES (?, ?, ?)", (usuario_id, req.telefono, req.direccion))
+            cursor.execute("INSERT INTO clientes (usuario_id, telefono, direccion) VALUES (?, ?, ?)",
+                           (usuario_id, req.telefono, req.direccion))
             cliente_id = cursor.lastrowid
         conexion.commit()
     except Exception as e:
         conexion.close()
         raise HTTPException(status_code=400, detail=f"No se pudo registrar el usuario: {str(e)}")
     conexion.close()
-    return {"usuario_id": usuario_id, "cliente_id": cliente_id, "nombre": req.nombre, "rol": req.rol}
-
+    return {"usuario_id": usuario_id, "cliente_id": cliente_id,
+            "nombre": req.nombre, "rol": req.rol}
 
 @router.get("/marcas")
 def obtener_marcas():
