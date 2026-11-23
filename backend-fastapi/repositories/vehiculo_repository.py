@@ -1,9 +1,7 @@
-
 """vehiculo_repository.py"""
 
 from database import obtener_conexion
 from domain.vehiculo import Vehiculo
-
 
 class VehiculoRepository:
     """Gestiona las operaciones de acceso a datos de los vehículos."""

@@ -55,7 +55,7 @@ class FacturaRepository:
         Returns:
             int: Identificador generado para el nuevo pago.
         """
-        
+
         conexion = obtener_conexion()
         cursor = conexion.cursor()
         cursor.execute("""

@@ -1,8 +1,7 @@
 """factura.py"""
 
-from domain.entidad import Entidad
 from functools import reduce
-
+from domain.entidad import Entidad
 class DetalleFactura(Entidad):
     """Representa un concepto individual incluido en una factura."""
 
@@ -26,7 +25,6 @@ class DetalleFactura(Entidad):
             "precio_unitario": self.precio_unitario,
             "subtotal": self.subtotal
         }
-
 
 class Factura(Entidad):
     """Representa una factura y administra sus detalles y cálculos monetarios."""

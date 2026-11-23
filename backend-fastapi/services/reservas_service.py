@@ -6,8 +6,7 @@ from domain.factura import Factura, DetalleFactura
 from repositories.vehiculo_repository import VehiculoRepository
 from repositories.alquiler_repository import AlquilerRepository
 from repositories.factura_repository import FacturaRepository
-from services.service_inventario import ServicioInventario
-
+from services.inventario_service import ServicioInventario
 
 class ServicioReservas:
     """Coordina el proceso de reserva de vehículos, facturación y registro de pagos."""
@@ -51,7 +50,7 @@ class ServicioReservas:
         disponibles = self.inventario_service.calcular_disponibles(vehiculo_id)
         if not vehiculo.puede_alquilarse(disponibles):
             raise ValueError("El vehículo no está habilitado o no tiene unidades disponibles.")
-        
+
         alquiler = Alquiler(cliente_id=cliente_id, vehiculo_id=vehiculo_id,
                             fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, estado="reservado")
         dias = alquiler.calcular_dias()

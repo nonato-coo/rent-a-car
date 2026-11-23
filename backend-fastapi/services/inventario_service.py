@@ -5,7 +5,6 @@ from repositories.vehiculo_repository import VehiculoRepository
 from repositories.alquiler_repository import AlquilerRepository
 from repositories.compra_repository import CompraRepository
 
-
 class ServicioInventario:
     """Gestiona el inventario de vehículos y calcula su disponibilidad."""
 

@@ -6,8 +6,8 @@ from fastapi import APIRouter, HTTPException
 from schemas.modelos import CompraCreate, CotizacionRequest, ReservaCreate
 from repositories.vehiculo_repository import VehiculoRepository
 from domain.calculadora import CalculadoraCostos
-from services.service_inventario import ServicioInventario
-from services.service_reservas import ServicioReservas
+from services.inventario_service import ServicioInventario
+from services.reservas_service import ServicioReservas
 
 router = APIRouter(tags=["Operaciones"])
 vehiculo_repo = VehiculoRepository()
@@ -15,7 +15,7 @@ inventario_service = ServicioInventario()
 reservas_service = ServicioReservas()
 
 @router.post("/cotizar")
-def cotizar_alquiler(req: CotizacionRequest):
+def cotizar_alquiler(req: CotizacionRequest) -> dict:
     """Calcula el costo estimado del alquiler de un vehículo.
 
     Args:
@@ -39,7 +39,7 @@ def cotizar_alquiler(req: CotizacionRequest):
         f1 = datetime.strptime(req.fecha_inicio, "%Y-%m-%d")
         f2 = datetime.strptime(req.fecha_fin, "%Y-%m-%d")
         if f2 < f1:
-            raise HTTPException(status_code=400, 
+            raise HTTPException(status_code=400,
                                 detail="La fecha fin no puede ser menor a la fecha inicio")
         dias = max((f2 - f1).days, 1)
     except ValueError:
@@ -50,7 +50,7 @@ def cotizar_alquiler(req: CotizacionRequest):
     return cotizacion
 
 @router.post("/compras")
-def registrar_compra(compra: CompraCreate):
+def registrar_compra(compra: CompraCreate) -> dict:
     """Registra la compra de unidades de un vehículo y actualiza el inventario.
 
     Args:
@@ -71,13 +71,13 @@ def registrar_compra(compra: CompraCreate):
             costo_unitario=compra.costo_unitario,
             proveedor=compra.proveedor
         )
-    
+
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.post("/reservas")
-def crear_reserva(reserva: ReservaCreate):
+def crear_reserva(reserva: ReservaCreate) -> dict:
     """Crea una reserva de vehículo y gestiona su facturación y pago.
 
     Args:
@@ -103,4 +103,4 @@ def crear_reserva(reserva: ReservaCreate):
             metodo_pago=reserva.metodo_pago
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e

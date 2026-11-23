@@ -56,7 +56,7 @@ class AlquilerRepository:
         Returns:
             int: Cantidad de alquileres activos o reservados.
         """
-        
+
         conexion = obtener_conexion()
         cursor = conexion.cursor()
         cursor.execute("""

@@ -7,7 +7,7 @@ from schemas.modelos import VehiculoCreate, VehiculoUpdate, EstadoAlquilerUpdate
 from domain.vehiculo import Vehiculo
 from repositories.vehiculo_repository import VehiculoRepository
 from repositories.alquiler_repository import AlquilerRepository
-from services.service_inventario import ServicioInventario
+from services.inventario_service import ServicioInventario
 from utils.funciones import extraer_marcas_unicas, extraer_anios_unicos, sumar_montos
 
 router = APIRouter(tags=["Gestión y Auth"])
