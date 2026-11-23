@@ -1,4 +1,4 @@
-"""servicio_inventario.py"""
+"""service_inventario.py"""
 
 from datetime import datetime
 from repositories.vehiculo_repository import VehiculoRepository

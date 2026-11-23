@@ -1,4 +1,4 @@
-"""servicio_reservas.py"""
+"""service_reservas.py"""
 
 from datetime import datetime
 from domain.alquiler import Alquiler
@@ -6,7 +6,7 @@ from domain.factura import Factura, DetalleFactura
 from repositories.vehiculo_repository import VehiculoRepository
 from repositories.alquiler_repository import AlquilerRepository
 from repositories.factura_repository import FacturaRepository
-from services.servicio_inventario import ServicioInventario
+from services.service_inventario import ServicioInventario
 
 
 class ServicioReservas:

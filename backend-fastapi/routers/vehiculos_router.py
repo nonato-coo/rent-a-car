@@ -4,7 +4,7 @@ from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 from repositories.vehiculo_repository import VehiculoRepository
-from services.servicio_inventario import ServicioInventario
+from services.service_inventario import ServicioInventario
 
 router = APIRouter(prefix="/vehiculos", tags=["Vehículos"])
 vehiculo_repo = VehiculoRepository()

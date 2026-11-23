@@ -6,8 +6,8 @@ from fastapi import APIRouter, HTTPException
 from schemas.modelos import CompraCreate, CotizacionRequest, ReservaCreate
 from repositories.vehiculo_repository import VehiculoRepository
 from domain.calculadora import CalculadoraCostos
-from services.servicio_inventario import ServicioInventario
-from services.servicio_reservas import ServicioReservas
+from services.service_inventario import ServicioInventario
+from services.service_reservas import ServicioReservas
 
 router = APIRouter(tags=["Operaciones"])
 vehiculo_repo = VehiculoRepository()
@@ -93,7 +93,7 @@ def crear_reserva(reserva: ReservaCreate):
             no existe o no tiene unidades disponibles, devuelve el código
             HTTP 400.
     """
-    
+
     try:
         return reservas_service.crear_reserva_completa(
             cliente_id=reserva.cliente_id,
