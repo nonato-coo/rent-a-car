@@ -19,7 +19,7 @@ class UsuarioRepository:
         """Convierte una fila de la base de datos en un objeto Usuario."""
 
         return Usuario(
-            id_usuario = row["id"],
+            usuario_id = row["id"],
             nombre = row["nombre"],
             email = row["email"],
             password = row["password"],
