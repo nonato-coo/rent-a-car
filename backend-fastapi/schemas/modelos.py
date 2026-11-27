@@ -43,7 +43,7 @@ class ReservaCreate(BaseModel):
         metodo_pago (Optional[str]): Método de pago utilizado. Por defecto,
             utiliza "Tarjeta Simulada".
     """
-    
+
     cliente_id: int
     vehiculo_id: int
     fecha_inicio: str  # formato YYYY-MM-DD
