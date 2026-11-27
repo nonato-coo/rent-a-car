@@ -2,9 +2,9 @@
 class Entidad:
     """Define la estructura base y los comportamientos comunes de las entidades del sistema."""
 
-    def __init__(self, id_entidad: int | None = None):
+    def __init__(self, entidad_id: int | None = None):
         """Inicializa una entidad con un identificador opcional."""
-        self._id = id_entidad
+        self._id = entidad_id
 
     @property
     def id(self) -> int | None:

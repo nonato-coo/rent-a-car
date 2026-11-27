@@ -1,15 +1,7 @@
 """Define la clase 'Usuario', hereda de `Entidad`.
 
-Atributos:
-    id (int)
-    nombre (str)
-    email (str)
-    rol (str, property):
-
-Métodos:
-    es_admin()
-    verificar_password(password: str) -> bool
-    to_dict() -> dict
+Atributos: id (int) | nombre (str) | email (str) | rol (str, property) | password (str, property)
+Métodos: es_admin() | verificar_password(password: str) -> bool | to_dict() -> dict
 """
 
 from config import ROLES
@@ -18,10 +10,10 @@ from domain.entidad import Entidad
 class Usuario(Entidad):
     """Representa un usuario del sistema con credenciales y rol asignado."""
 
-    def __init__(self, nombre: str, email: str, password: str, rol: str, id_usuario: int = None):
+    def __init__(self, nombre: str, email: str, password: str, rol: str, usuario_id: int = None):
         """Inicializa una nueva instancia de usuario validando su rol."""
 
-        super().__init__(id_usuario)
+        super().__init__(usuario_id)
 
         if rol not in ROLES:
             raise ValueError("Rol invalido")
@@ -35,6 +27,11 @@ class Usuario(Entidad):
     def rol(self) -> str:
         """Retorna el rol del usuario."""
         return self._rol
+
+    @property
+    def password(self) -> str:
+        """Retorna la contraseña del usuario."""
+        return self._password
 
     def es_admin(self) -> bool:
         """Indica si el usuario tiene rol de administrador."""

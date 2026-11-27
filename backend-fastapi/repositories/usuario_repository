@@ -1,0 +1,94 @@
+"""Define la clase 'UsuarioRepository'
+
+Métodos: 
+    _mapear(row) -> Usuario
+    crear(usuario: Usuario) -> int
+    listar_todos() -> list[Usuario]
+    obtener_por_id(usuario_id: int) -> Usuario | None
+    actualizar(usuario: Usuario) -> None
+    eliminar(usuario_id: int) -> None
+"""
+
+from database import obtener_conexion
+from domain.usuario import Usuario
+
+class UsuarioRepository:
+    """Gestiona las operaciones de acceso a datos de los usuarios."""
+
+    def _mapear(self, row) -> Usuario:
+        """Convierte una fila de la base de datos en un objeto Usuario."""
+
+        return Usuario(
+            id_usuario = row["id"],
+            nombre = row["nombre"],
+            email = row["email"],
+            password = row["password"],
+            rol = row["rol"]
+        )
+
+    def crear(self, usuario: Usuario) -> int:
+        """Registra un nuevo usuario y retorna su identificador."""
+
+        conexion = obtener_conexion()
+        cursor = conexion.cursor()
+
+        cursor.execute("""
+            INSERT INTO usuarios (nombre, email, password, rol)
+            VALUES (?, ?, ?, ?)""",
+            (usuario.nombre, usuario.email, usuario.password, usuario.rol)
+        )
+
+        conexion.commit()
+        nuevo_id = cursor.lastrowid
+        conexion.close()
+        return nuevo_id
+
+    def listar_todos(self) -> list[Usuario]:
+        """Obtiene todos los usuarios registrados."""
+
+        conexion = obtener_conexion()
+
+        filas = conexion.execute(
+            "SELECT * FROM usuarios"
+        ).fetchall()
+
+        conexion.close()
+        return [self._mapear(f) for f in filas]
+
+    def obtener_por_id(self, usuario_id: int) -> Usuario | None:
+        """Busca un usuario por su identificador, o None si no existe."""
+
+        conexion = obtener_conexion()
+
+        fila = conexion.execute(
+            "SELECT * FROM usuarios WHERE id = ?",
+            (usuario_id,)
+        ).fetchone()
+
+        conexion.close()
+        return self._mapear(fila) if fila else None
+
+    def actualizar(self, usuario: Usuario) -> None:
+        """Actualiza los datos de un usuario existente."""
+
+        conexion = obtener_conexion()
+
+        conexion.execute(
+            "UPDATE usuarios SET nombre = ?, email = ?, password = ?, rol = ? WHERE id = ?",
+            (usuario.nombre, usuario.email, usuario.password, usuario.rol, usuario.id))
+
+        conexion.commit()
+        conexion.close()
+
+    def eliminar(self, usuario_id: int) -> None:
+        """Elimina un usuario por su identificador."""
+
+        conexion = obtener_conexion()
+
+        conexion.execute(
+            "DELETE FROM usuarios WHERE id = ?",
+            (usuario_id,)
+        )
+
+        conexion.commit()
+        conexion.close()

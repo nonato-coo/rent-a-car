@@ -7,20 +7,13 @@ class VehiculoRepository:
     """Gestiona las operaciones de acceso a datos de los vehículos."""
 
     def _mapear(self, row) -> Vehiculo:
-        """Convierte una fila de la base de datos en un objeto Vehiculo.
-
-        Args:
-            row: Fila obtenida de la consulta SQL con los datos del vehículo.
-
-        Returns:
-            Vehiculo: Objeto construido a partir de los datos de la fila.
-        """
+        """Convierte una fila de la base de datos en un objeto Vehiculo."""
 
         return Vehiculo(
             id_vehiculo=row["id"],
             marca=row["marca"],
             modelo=row["modelo"],
-             anio=row["anio"],
+            anio=row["anio"],
             categoria=row["categoria"],
             precio_por_dia=row["precio_por_dia"],
             stock_total=row["stock_total"],
@@ -28,11 +21,7 @@ class VehiculoRepository:
         )
 
     def listar_todos(self) -> list[Vehiculo]:
-        """Obtiene todos los vehículos registrados en la base de datos.
-
-        Returns:
-            list[Vehiculo]: Lista de vehículos registrados.
-        """
+        """Obtiene todos los vehículos registrados en la base de datos."""
 
         conexion = obtener_conexion()
         cursor = conexion.cursor()
@@ -42,14 +31,7 @@ class VehiculoRepository:
         return [self._mapear(f) for f in filas]
 
     def obtener_por_id(self, vehiculo_id: int) -> Vehiculo | None:
-        """Busca un vehículo mediante su identificador.
-
-        Args:
-            vehiculo_id (int): Identificador del vehículo que se desea consultar.
-
-        Returns:
-            Vehiculo | None: Vehículo encontrado o None si no existe.
-        """
+        """Busca un vehículo mediante su identificador."""
 
         conexion = obtener_conexion()
         cursor = conexion.cursor()
@@ -59,23 +41,18 @@ class VehiculoRepository:
         return self._mapear(fila) if fila else None
 
     def crear(self, vehiculo: Vehiculo) -> int:
-        """Registra un nuevo vehículo en la base de datos.
-
-        Args:
-            vehiculo (Vehiculo): Objeto con los datos del vehículo que se desea registrar.
-
-        Returns:
-            int: Identificador generado para el nuevo vehículo.
-        """
+        """Registra un nuevo vehículo en la base de datos."""
 
         conexion = obtener_conexion()
         cursor = conexion.cursor()
+
         cursor.execute("""
             INSERT INTO vehiculos (marca, modelo, anio, categoria, precio_por_dia, stock_total, habilitado)
             VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (vehiculo.marca, vehiculo.modelo, vehiculo.anio,
             vehiculo.categoria, vehiculo.precio_por_dia,
             vehiculo.stock_total, vehiculo.habilitado))
+        
         conexion.commit()
         nuevo_id = cursor.lastrowid
         conexion.close()
