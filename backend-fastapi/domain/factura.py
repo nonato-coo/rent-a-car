@@ -72,6 +72,7 @@ class Factura(Entidad):
         """
         return {
             "id": self.id,
+            "numero": f"FAC-{self.id:06d}" if self.id else None,
             "alquiler_id": self.alquiler_id,
             "cliente_id": self.cliente_id,
             "fecha": self.fecha,

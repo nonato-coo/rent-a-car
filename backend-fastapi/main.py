@@ -3,8 +3,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.database import inicializar_base_de_datos
-from routers import vehiculos_router, operaciones_router, gestion_router, auth_router
-from routers import compras_facturas_router
+from routers import (auth_router, usuarios_router, clientes_router, vehiculos_router, alquileres_router,
+                     compras_router, pagos_router, facturas_router, operaciones_router)
 
 inicializar_base_de_datos()
 
@@ -22,11 +22,15 @@ app.add_middleware (
     allow_methods=["*"]
 )
 
-app.include_router(vehiculos_router.router)
-app.include_router(operaciones_router.router)
-app.include_router(gestion_router.router)
 app.include_router(auth_router.router)
-app.include_router(compras_facturas_router.router)
+app.include_router(usuarios_router.router)
+app.include_router(clientes_router.router)
+app.include_router(vehiculos_router.router)
+app.include_router(alquileres_router.router)
+app.include_router(compras_router.router)
+app.include_router(pagos_router.router)
+app.include_router(facturas_router.router)
+app.include_router(operaciones_router.router)
 
 @app.get("/")
 def leer_raiz():
