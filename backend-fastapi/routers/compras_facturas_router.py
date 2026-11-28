@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from database import obtener_conexion
+from core.database import obtener_conexion
 
 router = APIRouter(tags=["Compras, Facturas y Pagos"])
 
