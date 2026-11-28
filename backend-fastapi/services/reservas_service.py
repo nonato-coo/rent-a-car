@@ -3,7 +3,7 @@
 Métodos:
     crear_reserva_completa(cliente_id, vehiculo_id, fecha_inicio, fecha_fin, metodo_pago) -> dict
     cambiar_estado(alquiler_id: int, nuevo_estado: str) -> dict
-    _validar_fechas(fecha_inicio: str, fecha_fin: str) -> None
+    validar_fechas(fecha_inicio: str, fecha_fin: str) -> None
 """
 
 from datetime import datetime
@@ -16,6 +16,7 @@ from repositories.alquiler_repository import AlquilerRepository
 from repositories.factura_repository import FacturaRepository
 from repositories.pago_repository import PagoRepository
 from services.inventario_service import ServicioInventario
+from core.excepciones import NoEncontradoError
 
 class ServicioReservas:
     """Coordina la reserva de vehículos, su facturación y el registro de pagos."""
@@ -38,7 +39,7 @@ class ServicioReservas:
         self.pago_repo = PagoRepository()
         self.inventario_service = ServicioInventario()
 
-    def _validar_fechas(self, fecha_inicio: str, fecha_fin: str) -> None:
+    def validar_fechas(self, fecha_inicio: str, fecha_fin: str) -> None:
         """Verifica que las fechas tengan formato YYYY-MM-DD y un rango válido.
 
         Raises:
@@ -78,14 +79,12 @@ class ServicioReservas:
                 existen, o el vehículo no está habilitado o no tiene unidades.
         """
 
-        self._validar_fechas(fecha_inicio, fecha_fin)
-
+        self.validar_fechas(fecha_inicio, fecha_fin)
         if not self.cliente_repo.obtener_por_id(cliente_id):
-            raise ValueError("Cliente no encontrado.")
-
+            raise NoEncontradoError("Cliente no encontrado.")
         vehiculo = self.vehiculo_repo.obtener_por_id(vehiculo_id)
         if not vehiculo:
-            raise ValueError("Vehículo no encontrado.")
+            raise NoEncontradoError("Vehículo no encontrado.")
 
         disponibles = self.inventario_service.calcular_disponibles(vehiculo_id)
         if not vehiculo.puede_alquilarse(disponibles):
@@ -138,7 +137,7 @@ class ServicioReservas:
 
         alquiler = self.alquiler_repo.obtener_por_id(alquiler_id)
         if not alquiler:
-            raise ValueError("Alquiler no encontrado.")
+            raise NoEncontradoError("Alquiler no encontrado.")
 
         if nuevo_estado not in self.TRANSICIONES.get(alquiler.estado, []):
             raise ValueError(f"No se puede cambiar un alquiler de '{alquiler.estado}' a '{nuevo_estado}'.")
@@ -146,3 +145,50 @@ class ServicioReservas:
         alquiler.cambiar_estado(nuevo_estado)
         self.alquiler_repo.actualizar_estado(alquiler_id, alquiler.estado)
         return alquiler.to_dict()
+
+    def actualizar_alquiler(self, alquiler_id: int, cliente_id: int = None, vehiculo_id: int = None,
+                            fecha_inicio: str = None, fecha_fin: str = None, estado: str = None) -> dict:
+        """Actualiza los campos recibidos de un alquiler validando datos y transición de estado."""
+
+        actual = self.alquiler_repo.obtener_por_id(alquiler_id)
+        if not actual:
+            raise NoEncontradoError("Alquiler no encontrado.")
+
+        cliente_id = cliente_id if cliente_id is not None else actual.cliente_id
+        vehiculo_id = vehiculo_id if vehiculo_id is not None else actual.vehiculo_id
+        fecha_inicio = fecha_inicio or actual.fecha_inicio
+        fecha_fin = fecha_fin or actual.fecha_fin
+        self.validar_fechas(fecha_inicio, fecha_fin)
+
+        if not self.cliente_repo.obtener_por_id(cliente_id):
+            raise NoEncontradoError("Cliente no encontrado.")
+        vehiculo = self.vehiculo_repo.obtener_por_id(vehiculo_id)
+        if not vehiculo:
+            raise NoEncontradoError("Vehículo no encontrado.")
+
+        if estado and estado != actual.estado and estado not in self.TRANSICIONES.get(actual.estado, []):
+            raise ValueError(f"No se puede cambiar un alquiler de '{actual.estado}' a '{estado}'.")
+
+        if vehiculo_id != actual.vehiculo_id and actual.estado in ("reservado", "activo"):
+            if not vehiculo.puede_alquilarse(self.inventario_service.calcular_disponibles(vehiculo_id)):
+                raise ValueError("El nuevo vehículo no está habilitado o no tiene unidades disponibles.")
+
+        editado = Alquiler(cliente_id=cliente_id, vehiculo_id=vehiculo_id, fecha_inicio=fecha_inicio,
+                           fecha_fin=fecha_fin, estado=actual.estado, id_alquiler=alquiler_id)
+        if estado:
+            editado.cambiar_estado(estado)
+        self.alquiler_repo.actualizar(editado)
+        return editado.to_dict()
+
+    def eliminar_alquiler(self, alquiler_id: int) -> None:
+        """Elimina un alquiler junto con sus facturas y pagos."""
+
+        if not self.alquiler_repo.obtener_por_id(alquiler_id):
+            raise NoEncontradoError("Alquiler no encontrado.")
+        for f in self.factura_repo.listar_todos():
+            if f.alquiler_id == alquiler_id:
+                self.factura_repo.eliminar(f.id)
+        for p in self.pago_repo.listar_todos():
+            if p.alquiler_id == alquiler_id:
+                self.pago_repo.eliminar(p.id)
+        self.alquiler_repo.eliminar(alquiler_id)

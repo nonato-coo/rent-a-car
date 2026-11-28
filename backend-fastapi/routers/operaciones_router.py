@@ -31,7 +31,7 @@ def cotizar_alquiler(req: CotizacionRequest) -> dict:
         raise HTTPException(status_code=404, detail="Vehículo no encontrado")
 
     try:
-        reservas_service._validar_fechas(req.fecha_inicio, req.fecha_fin)
+        reservas_service.validar_fechas(req.fecha_inicio, req.fecha_fin)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
