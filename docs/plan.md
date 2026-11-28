@@ -28,24 +28,20 @@
 - **SQLite:** base de datos en un solo archivo. Se usa con el módulo `sqlite3` de Python, que ya viene instalado.
 - **Capas:** el router recibe la petición, un servicio aplica las reglas, un repositorio habla con la base. Mantiene el código ordenado.
 
-### 2.2 Estructura sugerida
+### 2.2 Estructura real
 
 ```
 backend-fastapi/
-├── main.py                 # crea la app, CORS, registra routers
-├── database.py             # conexión SQLite y creación de tablas
-├── seed.py                 # datos de prueba
-├── requirements.txt        # fastapi, uvicorn
-├── schemas/                # modelos Pydantic (entrada/salida de la API)
-├── domain/                 # clases POO del negocio
-│   ├── vehiculo.py
-│   ├── alquiler.py
-│   ├── factura.py
-│   └── calculadora.py
-├── repositories/           # acceso a SQLite (una clase por entidad)
-├── services/               # reglas de negocio
-├── routers/                # un archivo por recurso
-└── utils/funcional.py      # funciones puras reutilizables
+├── main.py            # app, CORS, routers
+├── seed.py            # datos de prueba
+├── requirements.txt
+├── core/              # config.py, database.py, excepciones.py (NoEncontradoError)
+├── domain/            # Entidad (base), Vehiculo, Alquiler, Factura, Pago, Compra, Usuario, Cliente, CalculadoraCostos
+├── schemas/           # modelos Pydantic
+├── repositories/      # un repositorio por entidad (SQL)
+├── services/          # auth, inventario, reservas
+├── routers/           # auth, usuarios, clientes, vehiculos, alquileres, compras, pagos, facturas, operaciones
+└── utils/funciones.py # funciones puras (filtros, marcas, años)
 ```
 
 ### 2.3 Tareas
