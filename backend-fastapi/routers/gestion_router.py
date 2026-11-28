@@ -234,3 +234,47 @@ def eliminar_vehiculo(vehiculo_id: int):
     conexion.commit()
     conexion.close()
     return {"mensaje": "Vehículo eliminado", "id": vehiculo_id}
+
+@router.put("/usuarios/{usuario_id}")
+def actualizar_usuario(usuario_id: int, data: dict):
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT id, nombre, email, rol FROM usuarios WHERE id = ?", (usuario_id,))
+    actual = cursor.fetchone()
+    if not actual:
+        conexion.close()
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    nombre = data.get("nombre") or actual["nombre"]
+    email = data.get("email") or actual["email"]
+    rol = data.get("rol") or actual["rol"]
+
+    if data.get("password"):
+        cursor.execute(
+            "UPDATE usuarios SET nombre = ?, email = ?, password = ?, rol = ? WHERE id = ?",
+            (nombre, email, data["password"], rol, usuario_id),
+        )
+    else:
+        cursor.execute(
+            "UPDATE usuarios SET nombre = ?, email = ?, rol = ? WHERE id = ?",
+            (nombre, email, rol, usuario_id),
+        )
+    conexion.commit()
+    conexion.close()
+    return {"id": usuario_id, "nombre": nombre, "email": email, "rol": rol}
+
+
+@router.delete("/usuarios/{usuario_id}")
+def eliminar_usuario(usuario_id: int):
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT id FROM usuarios WHERE id = ?", (usuario_id,))
+    if not cursor.fetchone():
+        conexion.close()
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    cursor.execute("DELETE FROM clientes WHERE usuario_id = ?", (usuario_id,))
+    cursor.execute("DELETE FROM usuarios WHERE id = ?", (usuario_id,))
+    conexion.commit()
+    conexion.close()
+    return {"mensaje": "Usuario eliminado", "id": usuario_id}
