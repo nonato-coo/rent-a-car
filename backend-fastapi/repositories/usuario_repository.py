@@ -5,6 +5,7 @@ Métodos:
     crear(usuario: Usuario) -> int
     listar_todos() -> list[Usuario]
     obtener_por_id(usuario_id: int) -> Usuario | None
+    buscar_por_email(email: str) -> Usuario | None
     actualizar(usuario: Usuario) -> None
     eliminar(usuario_id: int) -> None
 """
@@ -63,6 +64,19 @@ class UsuarioRepository:
         fila = conexion.execute(
             "SELECT * FROM usuarios WHERE id = ?",
             (usuario_id,)
+        ).fetchone()
+
+        conexion.close()
+        return self._mapear(fila) if fila else None
+
+    def buscar_por_email(self, email: str) -> Usuario | None:
+        """Busca un usuario por su correo electrónico, o None si no existe."""
+
+        conexion = obtener_conexion()
+
+        fila = conexion.execute(
+            "SELECT * FROM usuarios WHERE email = ?",
+            (email,)
         ).fetchone()
 
         conexion.close()
