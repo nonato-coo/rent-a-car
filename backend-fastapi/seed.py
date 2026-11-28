@@ -1,6 +1,6 @@
 """seed.py"""
 
-from database import obtener_conexion
+from core.database import obtener_conexion
 
 def ejecutar_seed():
     """Inserta datos de prueba iniciales en la base de datos."""

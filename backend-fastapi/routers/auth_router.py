@@ -6,7 +6,7 @@ Endpoints disponibles:
 """
 
 from fastapi import APIRouter, HTTPException
-from database import obtener_conexion
+from core.database import obtener_conexion
 from schemas.modelos import LoginRequest, RegistroRequest
 
 router = APIRouter(tags=["Auth"])

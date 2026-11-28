@@ -9,7 +9,7 @@ Métodos:
     eliminar(usuario_id: int) -> None
 """
 
-from database import obtener_conexion
+from core.database import obtener_conexion
 from domain.usuario import Usuario
 
 class UsuarioRepository:

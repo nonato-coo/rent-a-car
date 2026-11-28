@@ -1,7 +1,7 @@
 """gestion_router.py"""
 
 from fastapi import APIRouter, HTTPException
-from database import obtener_conexion
+from core.database import obtener_conexion
 from schemas.modelos import VehiculoCreate, VehiculoUpdate, EstadoAlquilerUpdate
 from domain.vehiculo import Vehiculo
 from repositories.vehiculo_repository import VehiculoRepository

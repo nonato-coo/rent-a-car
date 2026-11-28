@@ -1,6 +1,6 @@
 """compra_repository.py"""
 
-from database import obtener_conexion
+from core.database import obtener_conexion
 
 
 class CompraRepository:

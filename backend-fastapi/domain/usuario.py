@@ -4,7 +4,7 @@ Atributos: id (int) | nombre (str) | email (str) | rol (str, property) | passwor
 Métodos: es_admin() | verificar_password(password: str) -> bool | to_dict() -> dict
 """
 
-from config import ROLES
+from core.config import ROLES
 from domain.entidad import Entidad
 
 class Usuario(Entidad):

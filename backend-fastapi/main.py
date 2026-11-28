@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import inicializar_base_de_datos
+from core.database import inicializar_base_de_datos
 from routers import vehiculos_router, operaciones_router, gestion_router, auth_router
 
 inicializar_base_de_datos()
